@@ -1,0 +1,44 @@
+name: Terraform CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_ACCESS_KEY_ID: "ASIA4MTWHDRPMNZAZSIU"
+      AWS_SECRET_ACCESS_KEY: "3bq52/vJ1dSGEueBxZB6eVR/APEqyMK+XkihmRpO"
+      AWS_SESSION_TOKEN: >
+        IQoJb3JpZ2luX2VjEOH//////////wEaCXVzLXdlc3QtMiJIMEYCIQCzWBMsAbhqSk4MvI+HI6QQJtczBHHFxB3ZohmMNVVjYgIhAI9RBMFHLmdPUr85rTS9y1n3kKeRdTrlePgsaTIz6DprKr8CCJr//////////wEQABoMODUxNzI1MTk2MzgyIgysFw2o7ZF3r18EREoqkwKihjCugK3BJMCs5DF9m5jcDvNkZGmcP4qpwA4EYxxSe74Hey5QCu2JrB2misrc3TbxnXBDl0Zdh9a/9wGDOl0eHO8VlKjInCqOVJZuWEiASyaZZymQak5iN0XY+iwt0sOgBdtBwMkZwgXfxG7lNGFoNLcRt5AZoiFXngCqs1SkrtWUqZ4V3tsBNVealntosByqEV37NRa4ql82YEBgnJme+NDvkEZIt/ruMe6dLlwHaiZ5u7VRefDZ9/c7SXejXLRQ/z1x/Dya4GFi88jhnjBRXVeXVHn16bdXwA8fp9i3zIsYjCjT9bfVSOrffK/HMpl42BuhQb//WKY//vYu5ER5Nup1OEsV+fXoQrBkFWuV6dQG1TDnzOO6BjqcAX74zZwkcvcA/Yo3O8zMmOjLcGBleONERlvGvPOEkJ3IXSbtmNxsaxGQq1f/WKXKH6iLUtM9HcvboMZJuFvKSccGXY4NymTki+s0nRf8EqN0yFCidRZrU4hPsN1SZBx1dwZhPSD90v5Ou3lguzF2nFvOccGvSOZuF/RG+G19XwOlYI2XkF/OP1Xt08sq8u8A4q8tI3Wt2EljdRorDg==
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 1.3.5
+
+    - name: Initialize Terraform
+      run: terraform init
+
+    - name: Validate Terraform
+      run: terraform validate
+
+    - name: Terraform Plan
+      id: plan
+      run: terraform plan -var="core_count=1" -var="thread_count=2"
+
+    - name: Apply Terraform (on push to main)
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: terraform apply -var="core_count=1" -var="thread_count=2" -auto-approve
