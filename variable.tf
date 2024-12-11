@@ -9,3 +9,15 @@ variable "instance_name" {
   type        = string
   default     = "Terraform-Instance"
 }
+
+variable "core_count" {
+  description = "The number of CPU cores"
+  type        = number
+  default     = 1
+}
+
+variable "thread_count" {
+  description = "The number of threads"
+  type        = number
+  default     = 2
+}
